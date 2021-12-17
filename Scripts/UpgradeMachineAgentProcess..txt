@@ -32,7 +32,7 @@
 
 $servers = Get-Content -Path "C:\temp\servers.txt"
 foreach ($server in $servers){
-Copy-Item \\<sharename.domain.com>\<share>\machineagent-bundle-64bit-windows-21.12.0.3201.zip -Destination \\$server\C$\temp\machineagent-bundle-64bit-windows-21.12.0.3201.zip
+Copy-Item \\<sharename.domain.com>\<share\machineagent-bundle-64bit-windows-21.12.0.3201.zip -Destination \\$server\C$\temp\machineagent-bundle-64bit-windows-21.12.0.3201.zip
 
 Invoke-Command -ComputerName $server -ScriptBlock {
 ####Stop agent
