@@ -1,0 +1,82 @@
+<#
+    .SYNOPSIS
+        This script will update AppDynamics Machine Agent
+    
+    .DESCRIPTION
+        This script will update AppDynamics Machine Agent.
+    
+    .PARAMETER PlaceHolder
+        PlaceHolder.
+              
+    .INPUTS
+        Description of objects that can be piped to the script.
+
+    .OUTPUTS
+        Description of objects that are output by the script.
+    
+    .EXAMPLE
+        Example of how to run the script.
+    
+    .LINK
+        Links to further documentation.
+    
+    .NOTES
+        Detail on what the script does, if this is needed.
+    
+    .Author
+        Kevin Young
+   
+    .Date
+        12/13/2021
+    #>
+
+$servers = Get-Content -Path "C:\temp\servers.txt"
+foreach ($server in $servers){
+Copy-Item \\azg1usjmp001.custadds.com\C$\Dayforce\APPD\machineagent-bundle-64bit-windows-21.12.0.3201.zip -Destination \\$server\C$\temp\machineagent-bundle-64bit-windows-21.12.0.3201.zip
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+####Stop agent
+Write-Host "Stopping Current AppD Machine Agent on"$env:COMPUTERNAME"." -ForegroundColor Yellow
+Get-Service -Name "Appdynamics Machine Agent" | Stop-Service -Verbose
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Backup configuration
+Write-Host "Saving Config Files to C:\temp\AppDynamicsMachineAgent-prechange on"$env:COMPUTERNAME"." -ForegroundColor Yellow
+Copy-Item "C:\ProgramData\AppDynamics\AppDynamicsMachineAgent" -Destination "C:\temp\AppDynamicsMachineAgent-prechange" -Recurse -Force
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Uninstall Service configuration
+Write-Host "Uninstalling Service, if Backup File exist on"$env:COMPUTERNAME"." -ForegroundColor Yellow
+IF (test-path -path C:\temp\AppDynamicsMachineAgent-prechange\conf\controller-info.xml) {Start-Process -FilePath "cmd.exe" -ArgumentList "/c cscript.exe C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\UninstallService.vbs" -ErrorAction Stop -Wait -PassThru} else {Write-Host "BACKUP FOLDER NOT FOUND!" exit -ForegroundColor Red}
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Delete configuration
+Write-Host "Delete Old Config, if Backup File exist on"$env:COMPUTERNAME"." -ForegroundColor Yellow
+IF (test-path -path C:\temp\AppDynamicsMachineAgent-prechange\conf\controller-info.xml) {Remove-Item C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\* -Recurse -Force} else {Write-Host "BACKUP FOLDER NOT FOUND!" exit -ForegroundColor Red}
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Extract Zip Files
+Write-Host "Extracting Files on"$env:COMPUTERNAME"." -ForegroundColor Yellow
+Expand-Archive -literalPath 'C:\temp\machineagent-bundle-64bit-windows-21.12.0.3201.zip' -DestinationPath C:\ProgramData\AppDynamics\AppDynamicsMachineAgent
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Copy Config Files back
+Write-Host "Copy 3 files to "$env:COMPUTERNAME"." -ForegroundColor Yellow
+Copy-Item "C:\temp\AppDynamicsMachineAgent-prechange\conf\controller-info.xml" -Destination "C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\conf\controller-info.xml"
+Copy-Item "C:\temp\AppDynamicsMachineAgent-prechange\monitors\analytics-agent\conf\analytics-agent.properties" -Destination "C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\monitors\analytics-agent\conf\analytics-agent.properties"
+Copy-Item "C:\temp\AppDynamicsMachineAgent-prechange\monitors\analytics-agent\monitor.xml" -Destination "C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\monitors\analytics-agentmonitor.xml"
+}
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+###Install
+Write-Host "Install NewAgent on "$env:COMPUTERNAME"." -ForegroundColor Yellow
+##Start-Process -FilePath "cmd.exe" -ArgumentList "/c cscript.exe C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\InstallService.vbs" -ErrorAction Stop -Wait -PassThru
+IF (test-path -path C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\conf\controller-info.xml) {Start-Process -FilePath "cmd.exe" -ArgumentList "/c cscript.exe C:\ProgramData\AppDynamics\AppDynamicsMachineAgent\InstallService.vbs" -ErrorAction Stop -Wait -PassThru} else {Write-Host "Files not copied!" exit -ForegroundColor Red}
+}
+
+}
