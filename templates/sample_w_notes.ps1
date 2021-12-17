@@ -23,6 +23,8 @@
     .NOTES  
         Author: Kevin Young
         Date: 12/16/2021
+        Version: 
+        Disclaimer: This script is provided "AS IS" with no warranties.
 #>
     $ErrorActionPreference="SilentlyContinue"
     Stop-Transcript | out-null

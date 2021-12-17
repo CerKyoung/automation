@@ -28,6 +28,8 @@
    
     .Date
         12/16/2021
+        
+    Disclaimer: This script is provided "AS IS" with no warranties.
     #>
     $ErrorActionPreference="SilentlyContinue"
     Stop-Transcript | out-null
