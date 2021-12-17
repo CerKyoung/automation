@@ -20,14 +20,9 @@
     .LINK
         Links to further documentation.
     
-    .NOTES
-        Detail on what the script does, if this is needed.
-    
-    .Author
-        Kevin Young
-   
-    .Date
-        12/16/2021
+    .NOTES  
+        Author: Kevin Young
+        Date: 12/16/2021
 #>
     $ErrorActionPreference="SilentlyContinue"
     Stop-Transcript | out-null
