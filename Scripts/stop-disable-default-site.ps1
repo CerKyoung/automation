@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-        This script will update Check for Last Reboot
+        This can be used to Stop and Set Autostart flag to False
     
     .DESCRIPTION
-        This script will update Check for Last Reboot.
+        This can be used to Stop and Set Autostart flag to False.
     
     .PARAMETER PlaceHolder
         PlaceHolder.
