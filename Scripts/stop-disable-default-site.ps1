@@ -38,7 +38,7 @@
     Invoke-Command -ComputerName $server -ScriptBlock {
     ####Stop agent
     Write-Host "Stopping Default IIS Site on"$env:COMPUTERNAME"." -ForegroundColor Yellow
-    ipmo WebAdministration;Stop-IISSite -Name "Default Web Site" -Confirm:$false;Set-ItemProperty "IIS:\Sites\Default Web Site" serverAutoStart False
+    Import-Module WebAdministration;Stop-IISSite -Name "Default Web Site" -Confirm:$false;Set-ItemProperty "IIS:\Sites\Default Web Site" serverAutoStart False
     }
     }
     Stop-Transcript
